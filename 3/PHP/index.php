@@ -31,7 +31,13 @@ if (empty($_POST['year']) || !is_numeric($_POST['year']) || !preg_match('/^\d+$/
 }
 
 if (empty($_POST['email'])|| !filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-  $emailErr = "Invalid email format";
+  print('Впишите e-mail.<br/>');
+  $errors = TRUE;
+}
+
+if (empty($_POST['biography'])) {
+  print('Впишите вашу биографию.<br/>');
+  $errors = TRUE;
 }
 
 // *************
@@ -51,8 +57,18 @@ $db = new PDO('mysql:host=localhost;dbname=u52997', $user, $pass, [PDO::ATTR_PER
 
 // Подготовленный запрос. Не именованные метки.
 try {
-  $stmt = $db->prepare("INSERT INTO application SET name = ?, email = ?");
-  $stmt -> execute([$_POST['fio'], $_POST['email']]);
+  $stmt = $db->prepare("INSERT INTO application SET name = ?, email = ?, biography = ?");
+  $stmt -> execute([$_POST['fio'], $_POST['email'], $_POST['biography']]);
+  $application_id = $db->lastInsertId(); 
+  $ap_ability = $db->prepare("INSERT INTO application_ability SET  aplication_id = ?, ability_id = ?");
+  foreach($_POST['ability'] as $sbility)
+  {
+  $ap_ability -> execute([$application_id, $ability]);
+  print($ability);
+  }
+ 
+ 
+
 }
 catch(PDOException $e){
   print('Error : ' . $e->getMessage());
